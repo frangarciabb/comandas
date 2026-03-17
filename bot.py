@@ -406,36 +406,22 @@ def procesar_admin(numero, raw):
 def webhook():
     numero = request.form.get("From", "")
     raw    = request.form.get("Body", "").strip()
-
-    # LOG temporal para ver el número exacto
     print(f">>> NUMERO: {numero} | MENSAJE: {raw}")
 
     if not raw:
         resp = MessagingResponse()
         return str(resp)
 
-    # Temporalmente aceptar cualquier número como admin
     if numero not in ADMINS and numero not in MOZOS:
         ADMINS[numero] = "Admin temporal"
 
     if is_admin(numero):
         respuesta = procesar_admin(numero, raw)
-    else:
-        respuesta = procesar_mozo(numero, raw)
-
-    resp = MessagingResponse()
-    resp.message(respuesta)
-    return str(resp)
-    numero = request.form.get("From", "")
-    raw    = request.form.get("Body", "").strip()
-
-    if not raw or (numero not in ADMINS and numero not in MOZOS):
-        # Número no reconocido, ignorar
-        resp = MessagingResponse()
-        return str(resp)
-
-    if is_admin(numero):
-        respuesta = procesar_admin(numero, raw)
+        nombre = get_nombre(numero)
+        notify_all_admins(
+            f"👤 *{nombre}* escribió: {raw}\n\n🤖 Bot: {respuesta}",
+            exclude=numero
+        )
     else:
         respuesta = procesar_mozo(numero, raw)
 
